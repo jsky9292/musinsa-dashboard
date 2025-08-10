@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무신사 분석 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 헤더 */
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 통계 카드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+        }
+        
+        .stat-change {
+            color: #00c851;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .stat-change.down {
+            color: #ff4444;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        /* 메인 컨텐츠 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        /* 검색 섹션 */
+        .search-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #000;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1565c0;
+        }
+        
+        /* 카테고리 그리드 */
+        .category-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .category-btn {
+            padding: 16px;
+            background: #f8f8f8;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .category-btn:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            transform: translateY(-2px);
+        }
+        
+        .category-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .category-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* 트렌드 & 도구 섹션 */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        .panel-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .trend-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .trend-rank {
+            font-weight: 700;
+            color: #1976d2;
+            margin-right: 12px;
+            min-width: 30px;
+        }
+        
+        .trend-name {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .trend-change {
+            color: #00c851;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 14px;
+            background: #f8f8f8;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .tool-btn:hover {
+            background: #e3f2fd;
+            transform: translateX(4px);
+        }
+        
+        .tool-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tool-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .stat-card {
+                padding: 16px;
+            }
+            
+            .stat-value {
+                font-size: 20px;
+            }
+            
+            .category-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+        }
+        
+        /* 로딩 애니메이션 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        /* 알림 메시지 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <h1>무신사 분석 대시보드</h1>
+            <p class="subtitle">실시간 패션 트렌드 분석 및 상품 모니터링</p>
+        </header>
+
+        <!-- 통계 카드 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">📦</span>
+                    <span class="stat-change">↑ 12.5%</span>
+                </div>
+                <div class="stat-value">24,567</div>
+                <div class="stat-label">총 상품 수</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">💰</span>
+                    <span class="stat-change">↑ 8.2%</span>
+                </div>
+                <div class="stat-value">89,900원</div>
+                <div class="stat-label">평균 가격</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-change">↑ 0.3</span>
+                </div>
+                <div class="stat-value">4.6</div>
+                <div class="stat-label">평균 평점</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">💬</span>
+                    <span class="stat-change">↑ 23.1%</span>
+                </div>
+                <div class="stat-value">128K</div>
+                <div class="stat-label">총 리뷰 수</div>
+            </div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="main-content">
+            <!-- 검색 섹션 -->
+            <div class="search-section">
+                <h2 class="section-title">🔍 상품 검색</h2>
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="검색어를 입력하세요 (예: 나이키 후드)" id="searchInput">
+                    <button class="btn btn-primary" onclick="search()">검색하기</button>
+                </div>
+            </div>
+
+            <!-- 카테고리 섹션 -->
+            <div class="category-section">
+                <h2 class="section-title">📂 카테고리별 크롤링</h2>
+                <div class="category-grid">
+                    <button class="category-btn" onclick="selectCategory('상의')">
+                        <div class="category-icon">👔</div>
+                        <div class="category-name">상의</div>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('하의')">
+                        <div class="category-icon">👖</div>
+                        <div class="category-name">하의</div>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('아우터')">
+                        <div class="category-icon">🧥</div>
+                        <div class="category-name">아우터</div>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('신발')">
+                        <div class="category-icon">👟</div>
+                        <div class="category-name">신발</div>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('가방')">
+                        <div class="category-icon">👜</div>
+                        <div class="category-name">가방</div>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('액세서리')">
+                        <div class="category-icon">⌚</div>
+                        <div class="category-name">액세서리</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 하단 그리드 -->
+            <div class="bottom-grid">
+                <!-- 실시간 트렌드 -->
+                <div class="panel-section">
+                    <h3 class="section-title">🔥 실시간 인기 상품</h3>
+                    <div class="trend-item">
+                        <span class="trend-rank">#1</span>
+                        <span class="trend-name">나이키 에어포스1</span>
+                        <span class="trend-change">↑ 45%</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-rank">#2</span>
+                        <span class="trend-name">무신사 스탠다드 후드</span>
+                        <span class="trend-change">↑ 32%</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-rank">#3</span>
+                        <span class="trend-name">아디다스 삼선 팬츠</span>
+                        <span class="trend-change">↑ 28%</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-rank">#4</span>
+                        <span class="trend-name">뉴발란스 993</span>
+                        <span class="trend-change">↑ 24%</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-rank">#5</span>
+                        <span class="trend-name">스투시 베이직 티</span>
+                        <span class="trend-change">↑ 19%</span>
+                    </div>
+                </div>
+
+                <!-- 분석 도구 -->
+                <div class="panel-section">
+                    <h3 class="section-title">🛠️ 분석 도구</h3>
+                    <button class="tool-btn" onclick="analyze('review')">
+                        <div class="tool-info">
+                            <span>📝</span>
+                            <span class="tool-name">리뷰 분석</span>
+                        </div>
+                        <span>→</span>
+                    </button>
+                    <button class="tool-btn" onclick="analyze('brand')">
+                        <div class="tool-info">
+                            <span>🏢</span>
+                            <span class="tool-name">브랜드 분석</span>
+                        </div>
+                        <span>→</span>
+                    </button>
+                    <button class="tool-btn" onclick="analyze('price')">
+                        <div class="tool-info">
+                            <span>💵</span>
+                            <span class="tool-name">가격 추적</span>
+                        </div>
+                        <span>→</span>
+                    </button>
+                    <button class="tool-btn" onclick="exportData()">
+                        <div class="tool-info">
+                            <span>📊</span>
+                            <span class="tool-name">데이터 내보내기</span>
+                        </div>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 토스트 메시지 표시
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 검색 기능
+        function search() {
+            const input = document.getElementById('searchInput').value;
+            if (!input) {
+                showToast('검색어를 입력해주세요');
+                return;
+            }
+            showToast(`'${input}' 검색을 시작합니다`);
+            // 여기에 실제 검색 로직 추가
+        }
+
+        // 카테고리 선택
+        function selectCategory(category) {
+            showToast(`${category} 카테고리 크롤링을 시작합니다`);
+            // 여기에 실제 크롤링 로직 추가
+        }
+
+        // 분석 기능
+        function analyze(type) {
+            const messages = {
+                'review': '리뷰 분석을 시작합니다',
+                'brand': '브랜드 분석을 시작합니다',
+                'price': '가격 추적을 시작합니다'
+            };
+            showToast(messages[type]);
+            // 여기에 실제 분석 로직 추가
+        }
+
+        // 데이터 내보내기
+        function exportData() {
+            showToast('데이터를 CSV 파일로 내보냅니다');
+            // 여기에 실제 내보내기 로직 추가
+        }
+
+        // 엔터 키로 검색
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+    </script>
+</body>
+</html>
